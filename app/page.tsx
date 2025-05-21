@@ -1,103 +1,167 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useEffect } from 'react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from '@/components/ui/select';
+import { ProductCard } from './components/ProductCard';
+
+interface Product {
+	id: string;
+	title: string;
+	link: string;
+	image_link: string;
+	price: string;
+	availability: string;
+}
+
+interface Pagination {
+	total: number;
+	page: number;
+	limit: number;
+	totalPages: number;
+}
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+	const [searchQuery, setSearchQuery] = useState('');
+	const [availability, setAvailability] = useState('all');
+	const [minPrice, setMinPrice] = useState('');
+	const [maxPrice, setMaxPrice] = useState('');
+	const [products, setProducts] = useState<Product[]>([]);
+	const [pagination, setPagination] = useState<Pagination>({
+		total: 0,
+		page: 1,
+		limit: 10,
+		totalPages: 0,
+	});
+	const [isLoading, setIsLoading] = useState(false);
+	const [isSyncing, setIsSyncing] = useState(false);
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+	const fetchProducts = async (page = 1) => {
+		setIsLoading(true);
+		try {
+			const params = new URLSearchParams({
+				page: page.toString(),
+				limit: pagination.limit.toString(),
+				...(searchQuery && { q: searchQuery }),
+				...(availability && { availability }),
+				...(minPrice && { minPrice }),
+				...(maxPrice && { maxPrice }),
+			});
+
+			const response = await fetch(`/api/products/?${params.toString()}`);
+			const data = await response.json();
+
+			setProducts(data.products);
+			setPagination(data.pagination);
+		} catch (error) {
+			console.error('Error fetching products:', error);
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	const handleSync = async () => {
+		setIsSyncing(true);
+		try {
+			const response = await fetch('/api/sync', { method: 'POST' });
+			const data = await response.json();
+			if (data.success) {
+				fetchProducts();
+			}
+		} catch (error) {
+			console.error('Error syncing products:', error);
+		} finally {
+			setIsSyncing(false);
+		}
+	};
+
+	useEffect(() => {
+		const debounceTimer = setTimeout(() => {
+			fetchProducts(1);
+		}, 300);
+
+		return () => clearTimeout(debounceTimer);
+	}, [searchQuery, availability, minPrice, maxPrice]);
+
+	return (
+		<main className='container mx-auto px-4 py-8'>
+			<div className='flex justify-between items-center mb-8'>
+				<h1 className='text-3xl font-bold'>Product Search</h1>
+				<Button onClick={handleSync} disabled={isSyncing}>
+					{isSyncing ? 'Syncing...' : 'Sync Products'}
+				</Button>
+			</div>
+
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
+				<Input
+					placeholder='Search products...'
+					value={searchQuery}
+					onChange={(e) => setSearchQuery(e.target.value)}
+				/>
+				<Select value={availability} onValueChange={setAvailability}>
+					<SelectTrigger>
+						<SelectValue placeholder='Availability' />
+					</SelectTrigger>
+					<SelectContent>
+						<SelectItem value='all'>All</SelectItem>
+						<SelectItem value='in stock'>In Stock</SelectItem>
+						<SelectItem value='out of stock'>Out of Stock</SelectItem>
+					</SelectContent>
+				</Select>
+				<Input
+					type='number'
+					placeholder='Min Price'
+					value={minPrice}
+					onChange={(e) => setMinPrice(e.target.value)}
+				/>
+				<Input
+					type='number'
+					placeholder='Max Price'
+					value={maxPrice}
+					onChange={(e) => setMaxPrice(e.target.value)}
+				/>
+			</div>
+
+			{isLoading ? (
+				<div className='text-center'>Loading...</div>
+			) : (
+				<>
+					<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6'>
+						{products.map((product) => (
+							<ProductCard key={product.id} product={product} />
+						))}
+					</div>
+
+					{pagination.totalPages > 1 && (
+						<div className='flex justify-center gap-2 mt-8'>
+							<Button
+								variant='outline'
+								onClick={() => fetchProducts(pagination.page - 1)}
+								disabled={pagination.page === 1}
+							>
+								Previous
+							</Button>
+							<span className='py-2 px-4'>
+								Page {pagination.page} of {pagination.totalPages}
+							</span>
+							<Button
+								variant='outline'
+								onClick={() => fetchProducts(pagination.page + 1)}
+								disabled={pagination.page === pagination.totalPages}
+							>
+								Next
+							</Button>
+						</div>
+					)}
+				</>
+			)}
+		</main>
+	);
 }

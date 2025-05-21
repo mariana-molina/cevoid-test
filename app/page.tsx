@@ -11,6 +11,7 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { ProductCard } from './components/ProductCard';
+import { Label } from '@/components/ui/label';
 
 interface Product {
 	id: string;
@@ -34,8 +35,7 @@ interface Pagination {
 export default function Home() {
 	const [searchQuery, setSearchQuery] = useState('');
 	const [availability, setAvailability] = useState('all');
-	const [minPrice, setMinPrice] = useState('');
-	const [maxPrice, setMaxPrice] = useState('');
+	const [priceSort, setPriceSort] = useState('none');
 	const [products, setProducts] = useState<Product[]>([]);
 	const [pagination, setPagination] = useState<Pagination>({
 		total: 0,
@@ -54,8 +54,7 @@ export default function Home() {
 				limit: pagination.limit.toString(),
 				...(searchQuery && { q: searchQuery }),
 				...(availability && { availability }),
-				...(minPrice && { minPrice }),
-				...(maxPrice && { maxPrice }),
+				...(priceSort !== 'none' && { sort: priceSort }),
 			});
 
 			const response = await fetch(`/api/products/?${params.toString()}`);
@@ -91,7 +90,7 @@ export default function Home() {
 		}, 300);
 
 		return () => clearTimeout(debounceTimer);
-	}, [searchQuery, availability, minPrice, maxPrice]);
+	}, [searchQuery, availability, priceSort]);
 
 	return (
 		<main className='container mx-auto px-4 py-8'>
@@ -102,34 +101,37 @@ export default function Home() {
 				</Button>
 			</div>
 
-			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
-				<Input
-					placeholder='Search products...'
-					value={searchQuery}
-					onChange={(e) => setSearchQuery(e.target.value)}
-				/>
-				<Select value={availability} onValueChange={setAvailability}>
-					<SelectTrigger>
-						<SelectValue placeholder='Availability' />
-					</SelectTrigger>
-					<SelectContent>
-						<SelectItem value='all'>All</SelectItem>
-						<SelectItem value='in stock'>In Stock</SelectItem>
-						<SelectItem value='out of stock'>Out of Stock</SelectItem>
-					</SelectContent>
-				</Select>
-				<Input
-					type='number'
-					placeholder='Min Price'
-					value={minPrice}
-					onChange={(e) => setMinPrice(e.target.value)}
-				/>
-				<Input
-					type='number'
-					placeholder='Max Price'
-					value={maxPrice}
-					onChange={(e) => setMaxPrice(e.target.value)}
-				/>
+			<div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8'>
+				<div className='flex items-center gap-2'>	
+					<Input
+						placeholder='Search products...'
+						value={searchQuery}
+						onChange={(e) => setSearchQuery(e.target.value)}
+					/>
+					<Select value={availability} onValueChange={setAvailability}>
+						<SelectTrigger>
+							<SelectValue placeholder='Availability' />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value='all'>All</SelectItem>
+							<SelectItem value='in stock'>In Stock</SelectItem>
+							<SelectItem value='out of stock'>Out of Stock</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+				<div className='flex items-center gap-2'>
+					<Label htmlFor='sort-by-price'>Sort by Price</Label>
+					<Select value={priceSort} onValueChange={setPriceSort}>
+						<SelectTrigger>
+							<SelectValue placeholder='Sort by Price' />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value='none'>Clear</SelectItem>
+							<SelectItem value='price_asc'>Low to High</SelectItem>
+							<SelectItem value='price_desc'>High to Low</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
 			</div>
 
 			{isLoading ? (

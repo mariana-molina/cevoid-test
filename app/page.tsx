@@ -17,7 +17,10 @@ interface Product {
 	title: string;
 	link: string;
 	image_link: string;
-	price: string;
+	price: {
+		amount: number;
+		currency: string;
+	};
 	availability: string;
 }
 

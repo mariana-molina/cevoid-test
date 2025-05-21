@@ -12,7 +12,10 @@ interface ProductCardProps {
 		title: string;
 		link: string;
 		image_link: string;
-		price: string;
+		price: {
+			amount: number;
+			currency: string;
+		};
 		availability: string;
 	};
 }
@@ -32,7 +35,9 @@ export function ProductCard({ product }: ProductCardProps) {
 				<h3 className='font-semibold text-lg mb-2 line-clamp-2'>
 					{product.title}
 				</h3>
-				<p className='text-xl font-bold text-primary mb-2'>{product.price}</p>
+				<p className='text-xl font-bold text-primary mb-2'>
+					{product.price.amount.toFixed(2)} {product.price.currency}
+				</p>
 				<p
 					className={`text-sm ${
 						product.availability === 'in stock'

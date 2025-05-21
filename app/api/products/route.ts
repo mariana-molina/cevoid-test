@@ -5,9 +5,9 @@ import Product from '../../models/Product';
 interface ProductFilter {
 	$text?: { $search: string };
 	availability?: string;
-	price?: {
-		$gte?: string;
-		$lte?: string;
+	'price.amount'?: {
+		$gte?: number;
+		$lte?: number;
 	};
 }
 
@@ -35,12 +35,12 @@ export async function GET(request: NextRequest) {
 		}
 
 		if (minPrice || maxPrice) {
-			filter.price = {};
+			filter['price.amount'] = {};
 			if (minPrice) {
-				filter.price.$gte = minPrice;
+				filter['price.amount'].$gte = parseFloat(minPrice);
 			}
 			if (maxPrice) {
-				filter.price.$lte = maxPrice;
+				filter['price.amount'].$lte = parseFloat(maxPrice);
 			}
 		}
 

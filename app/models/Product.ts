@@ -20,8 +20,15 @@ const productSchema = new mongoose.Schema(
 			required: true,
 		},
 		price: {
-			type: String,
-			required: true,
+			amount: {
+				type: Number,
+				required: true,
+			},
+			currency: {
+				type: String,
+				required: true,
+				default: 'USD',
+			},
 		},
 		availability: {
 			type: String,

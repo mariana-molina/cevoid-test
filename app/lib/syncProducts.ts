@@ -10,7 +10,10 @@ interface ProductData {
 	title: string;
 	link: string;
 	image_link: string;
-	price: string;
+	price: {
+		amount: number;
+		currency: string;
+	};
 	availability: string;
 }
 
@@ -29,14 +32,22 @@ export async function syncProducts() {
 		const products = result.rss.channel[0].item;
 
 		// Transform products to match our schema
-		const transformedProducts: ProductData[] = products.map((product: any) => ({
-			id: product['ns0:id'][0],
-			title: product.title[0],
-			link: product.link[0],
-			image_link: product['ns0:image_link'][0],
-			price: product['ns0:price'][0],
-			availability: product['ns0:availability'][0],
-		}));
+		const transformedProducts: ProductData[] = products.map((product: any) => {
+			const priceStr = product['ns0:price'][0];
+			const [amount, currency] = priceStr.split(' ');
+
+			return {
+				id: product['ns0:id'][0],
+				title: product.title[0],
+				link: product.link[0],
+				image_link: product['ns0:image_link'][0],
+				price: {
+					amount: parseFloat(amount),
+					currency: currency || 'USD',
+				},
+				availability: product['ns0:availability'][0],
+			};
+		});
 		// Get all existing product IDs
 		const existingProducts = await Product.find({}, 'id');
 		const existingIds = new Set(existingProducts.map((p) => p.id));

@@ -37,7 +37,6 @@ export async function syncProducts() {
 			price: product['ns0:price'][0],
 			availability: product['ns0:availability'][0],
 		}));
-		console.log('transformedProducts!!!!!!', transformedProducts);
 		// Get all existing product IDs
 		const existingProducts = await Product.find({}, 'id');
 		const existingIds = new Set(existingProducts.map((p) => p.id));

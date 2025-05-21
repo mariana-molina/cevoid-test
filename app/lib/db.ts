@@ -33,8 +33,6 @@ async function connectDB() {
 		cached.promise = undefined;
 		throw e;
 	}
-	console.log('is connected to MONGO');
-
 	return cached.connection;
 }
 

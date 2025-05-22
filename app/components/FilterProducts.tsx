@@ -9,21 +9,25 @@ import {
 	SelectValue,
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { useEffect, useState } from 'react';
+import { useDebounce } from '../hooks/useDebounce';
 
 const FilterProducts = () => {
 	const router = useRouter();
 	const searchParams = useSearchParams();
+	const [searchValue, setSearchValue] = useState(searchParams.get('q') || '');
+	const debouncedSearchValue = useDebounce(searchValue, 500); // 500ms delay
 
-	//Following functions usually in utils file
-	const handleSearch = (value: string) => {
+	// Update URL when debounced value changes
+	useEffect(() => {
 		const params = new URLSearchParams(searchParams.toString());
-		if (value) {
-			params.set('q', value);
+		if (debouncedSearchValue) {
+			params.set('q', debouncedSearchValue);
 		} else {
 			params.delete('q');
 		}
 		router.push(`/?${params.toString()}`);
-	};
+	}, [debouncedSearchValue, router, searchParams]);
 
 	const handleAvailability = (value: string) => {
 		const params = new URLSearchParams(searchParams.toString());
@@ -50,8 +54,8 @@ const FilterProducts = () => {
 			<div className='flex items-center gap-2'>
 				<Input
 					placeholder='Search products...'
-					value={searchParams.get('q') || ''}
-					onChange={(e) => handleSearch(e.target.value)}
+					value={searchValue}
+					onChange={(e) => setSearchValue(e.target.value)}
 				/>
 				<Select
 					value={searchParams.get('availability') || 'all'}

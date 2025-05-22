@@ -18,7 +18,8 @@ export async function GET(request: NextRequest) {
 		const searchParams = request.nextUrl.searchParams;
 		const query = searchParams.get('q') || '';
 		const availability = searchParams.get('availability');
-		const sort = searchParams.get('sort');
+		const minPrice = searchParams.get('minPrice');
+		const maxPrice = searchParams.get('maxPrice');
 		const page = parseInt(searchParams.get('page') || '1');
 		const limit = parseInt(searchParams.get('limit') || '10');
 
@@ -33,14 +34,14 @@ export async function GET(request: NextRequest) {
 			filter.availability = availability;
 		}
 
-		// Build sort object
-		let sortOptions = {};
-		if (sort === 'price_asc') {
-			sortOptions = { 'price.amount': 1 };
-		} else if (sort === 'price_desc') {
-			sortOptions = { 'price.amount': -1 };
-		} else if (query) {
-			sortOptions = { score: { $meta: 'textScore' } };
+		if (minPrice || maxPrice) {
+			filter['price.amount'] = {};
+			if (minPrice) {
+				filter['price.amount'].$gte = parseFloat(minPrice);
+			}
+			if (maxPrice) {
+				filter['price.amount'].$lte = parseFloat(maxPrice);
+			}
 		}
 
 		// Calculate skip value for pagination
@@ -48,7 +49,10 @@ export async function GET(request: NextRequest) {
 
 		// Execute query with pagination
 		const [products, total] = await Promise.all([
-			Product.find(filter).sort(sortOptions).skip(skip).limit(limit),
+			Product.find(filter)
+				.sort(query ? { score: { $meta: 'textScore' } } : {})
+				.skip(skip)
+				.limit(limit),
 			Product.countDocuments(filter),
 		]);
 

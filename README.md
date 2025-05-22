@@ -32,8 +32,8 @@ MONGODB_URI=your_mongodb_connection_string
 1. Clone the repository:
 
 ```bash
-git clone <repository-url>
-cd <project-directory>
+git clone https://github.com/mariana-molina/cevoid-test.git
+cd cevoid-test
 ```
 
 2. Install dependencies:
@@ -61,21 +61,23 @@ yarn dev
 
 ## Project Structure
 
+```
 app/
-├── api/ # API routes
-│ ├── products/ # Product search endpoint
-│ └── sync/ # Product sync endpoint
-├── components/ # React components
-│ ├── FilterProducts.tsx # Search and filter controls
-│ ├── Pagination.tsx # Pagination controls
-│ ├── ProductCard.tsx # Product display card
-│ └── SyncButton.tsx # Sync button component
-├── lib/ # Utility functions
-│ ├── db.ts # Database connection
-│ └── syncProducts.ts # Product sync logic
-├── models/ # Database models
-│ └── Product.ts # Product schema
-└── page.tsx # Main page component
+├── api/                    
+│   ├── products/          # Product search endpoint
+│   └── sync/             # Product sync endpoint
+├── components/            
+│   ├── FilterProducts.tsx # Search and filter controls
+│   ├── Pagination.tsx    # Pagination controls
+│   ├── ProductCard.tsx   # Product display card
+│   └── SyncButton.tsx    # Sync button component
+├── lib/                 
+│   ├── db.ts             # Database connection
+│   └── syncProducts.ts   # Product sync logic
+├── models/               
+│   └── Product.ts        # Product schema
+└── page.tsx              # Main page component
+```
 
 ## Database Schema
 

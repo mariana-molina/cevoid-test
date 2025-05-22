@@ -1,36 +1,130 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Product Search Application
 
-## Getting Started
+A Next.js application that displays and manages products with search, filtering, and sorting capabilities.
 
-First, run the development server:
+## Features
+
+- Server-side rendering with Next.js 13+
+- MongoDB integration for data storage
+- Product search with text search capabilities
+- Price sorting (low to high, high to low)
+- Availability filtering
+- Pagination
+- Product synchronization from XML feed
+- Responsive design with Tailwind CSS and Shadcn component library
+
+## Prerequisites
+
+- Node.js 18+
+- MongoDB database
+- npm or yarn
+
+## Environment Variables
+
+Create a `.env.local` file in the root directory with the following variables:
+
+```env
+MONGODB_URI=your_mongodb_connection_string
+```
+
+## Installation
+
+1. Clone the repository:
+
+```bash
+git clone <repository-url>
+cd <project-directory>
+```
+
+2. Install dependencies:
+
+```bash
+npm install
+# or
+yarn install
+```
+
+3. Set up MongoDB:
+
+- Create a MongoDB database
+- Update the `.env.local` file with your MongoDB connection string
+
+4. Run the development server:
 
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) in your browser
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+app/
+├── api/ # API routes
+│ ├── products/ # Product search endpoint
+│ └── sync/ # Product sync endpoint
+├── components/ # React components
+│ ├── FilterProducts.tsx # Search and filter controls
+│ ├── Pagination.tsx # Pagination controls
+│ ├── ProductCard.tsx # Product display card
+│ └── SyncButton.tsx # Sync button component
+├── lib/ # Utility functions
+│ ├── db.ts # Database connection
+│ └── syncProducts.ts # Product sync logic
+├── models/ # Database models
+│ └── Product.ts # Product schema
+└── page.tsx # Main page component
 
-## Learn More
+## Database Schema
 
-To learn more about Next.js, take a look at the following resources:
+The Product model includes:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- id: Unique identifier
+- title: Product title
+- link: Product URL
+- image_link: Product image URL
+- price: Object containing amount and currency
+- availability: Stock status
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Endpoints
 
-## Deploy on Vercel
+### GET /api/products
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Query parameters:
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- `page`: Page number (default: 1)
+- `q`: Search query
+- `availability`: Filter by availability
+- `sort`: Sort by price (price_asc, price_desc)
+
+### POST /api/sync
+
+Synchronizes products from the XML feed
+
+## Features Implementation
+
+### Search
+
+- Text search using MongoDB text index
+- Debounced search input
+- Server-side filtering
+
+### Filtering
+
+- Availability filter (All, In Stock, Out of Stock)
+- Price sorting (Low to High, High to Low)
+
+### Pagination
+
+- Server-side pagination
+- Page size: 10 items
+- Previous/Next navigation
+
+### Product Sync
+
+- Fetches data from XML feed
+- Updates existing products
+- Removes deleted products
+- Adds new products

@@ -28,10 +28,12 @@ export async function syncProducts() {
 		const xmlData = await response.text();
 
 		// Parse XML to JSON
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const result: any = await parseXml(xmlData);
 		const products = result.rss.channel[0].item;
 
 		// Transform products to match our schema
+		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		const transformedProducts: ProductData[] = products.map((product: any) => {
 			const priceStr = product['ns0:price'][0];
 			const [amount, currency] = priceStr.split(' ');
@@ -56,7 +58,7 @@ export async function syncProducts() {
 		const newIds = new Set(transformedProducts.map((p) => p.id));
 
 		// Find products to delete (exist in DB but not in feed)
-		const productsToDelete = Array.from(existingIds).filter(
+		const productsToDelete:string[] = Array.from(existingIds).filter(
 			(id) => !newIds.has(id)
 		);
 

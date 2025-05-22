@@ -40,7 +40,7 @@ const productSchema = new mongoose.Schema(
 	}
 );
 
-// Create indexes for better search performance
+// Create text index for search
 productSchema.index({ title: 'text' });
 
 export default mongoose.models.Product ||

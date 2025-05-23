@@ -63,20 +63,19 @@ yarn dev
 
 ```
 app/
-├── api/                    
-│   ├── products/          # Product search endpoint
+├── api/
 │   └── sync/             # Product sync endpoint
-├── components/            
+├── components/
 │   ├── FilterProducts.tsx # Search and filter controls
 │   ├── Pagination.tsx    # Pagination controls
 │   ├── ProductCard.tsx   # Product display card
 │   └── SyncButton.tsx    # Sync button component
-├── lib/                 
+├── lib/
 │   ├── db.ts             # Database connection
 │   └── syncProducts.ts   # Product sync logic
-├── models/               
+├── models/
 │   └── Product.ts        # Product schema
-└── page.tsx              # Main page component
+└── page.tsx              # Main page component (server-side rendered)
 ```
 
 ## Database Schema
@@ -92,15 +91,6 @@ The Product model includes:
 
 ## API Endpoints
 
-### GET /api/products
-
-Query parameters:
-
-- `page`: Page number (default: 1)
-- `q`: Search query
-- `availability`: Filter by availability
-- `sort`: Sort by price (price_asc, price_desc)
-
 ### POST /api/sync
 
 Synchronizes products from the XML feed
@@ -109,9 +99,10 @@ Synchronizes products from the XML feed
 
 ### Search
 
-- Text search using MongoDB text index
+- Server-side search using MongoDB regex queries
 - Debounced search input
-- Server-side filtering
+- Partial text matching
+- Case-insensitive search
 
 ### Filtering
 

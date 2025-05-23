@@ -14,10 +14,12 @@ interface PageProps {
 		sort?: string;
 	};
 }
+
 interface ProductFilter {
-	$text?: { $search: string };
+	title?: { $regex: string; $options: string };
 	availability?: string;
 }
+
 interface Product {
 	id: string;
 	title: string;
@@ -42,15 +44,23 @@ export default async function Home({ searchParams }: PageProps) {
 
 	// Build the filter object
 	const filter: ProductFilter = {};
-	if (query) filter.$text = { $search: query };
-	if (availability && availability !== 'all')
+	if (query) {
+		// Escape special characters in the search query
+		const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+		// Create a case-insensitive regex that matches the query anywhere in the title
+		filter.title = {
+			$regex: `.*${escapedQuery}.*`,
+			$options: 'i',
+		};
+	}
+	if (availability && availability !== 'all') {
 		filter.availability = availability;
+	}
 
 	// Build sort object
 	let sortOptions = {};
 	if (sort === 'price_asc') sortOptions = { 'price.amount': 1 };
 	else if (sort === 'price_desc') sortOptions = { 'price.amount': -1 };
-	else if (query) sortOptions = { score: { $meta: 'textScore' } };
 
 	// Execute query with pagination
 	const [rawProducts, total] = await Promise.all([

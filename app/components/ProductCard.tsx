@@ -27,6 +27,8 @@ export function ProductCard({ product }: ProductCardProps) {
 				<Image
 					src={product.image_link}
 					alt={product.title}
+					sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+					priority
 					fill
 					className='object-contain'
 				/>
